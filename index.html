@@ -6,6 +6,7 @@
   <title>Login - Akasora POS Madu Akasia</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://unpkg.com/lucide@latest"></script>
+  <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&display=swap" rel="stylesheet">
   <style>
@@ -102,10 +103,10 @@
         </div>
       </div>
 
-      <button type="submit" 
-        class="w-full py-3.5 bg-amber-600 hover:bg-amber-700 hover:-translate-y-0.5 hover:shadow-xl text-white font-bold rounded-xl shadow-lg shadow-amber-600/30 transition-all duration-200 active:scale-95 active:translate-y-0 flex items-center justify-center gap-2 mt-3 text-xs">
-        <i data-lucide="log-in" class="w-4 h-4"></i>
-        <span>Masuk ke Sistem</span>
+      <button type="submit" id="btn-login"
+        class="w-full py-3.5 bg-amber-600 hover:bg-amber-700 hover:-translate-y-0.5 hover:shadow-xl disabled:opacity-60 disabled:hover:translate-y-0 disabled:hover:shadow-lg text-white font-bold rounded-xl shadow-lg shadow-amber-600/30 transition-all duration-200 active:scale-95 active:translate-y-0 flex items-center justify-center gap-2 mt-3 text-xs">
+        <i data-lucide="log-in" class="w-4 h-4" id="btn-login-icon"></i>
+        <span id="btn-login-text">Masuk ke Sistem</span>
       </button>
     </form>
 
@@ -116,11 +117,15 @@
   </div>
 
   <script>
-    // Database Akun (Dapat disesuaikan kredensialnya di sini)
-    const USER_DATABASE = {
-      "Admin": { password: "123", role: "admin", redirect: "admin.html", name: "Administrator" },
-      "Bayu": { password: "123", role: "user", redirect: "user.html", name: "Staff" }
-    };
+    // ============================================================
+    // KONEKSI SUPABASE
+    // Ganti dua nilai di bawah dengan Project URL & anon public key
+    // milik Anda (Supabase Dashboard > Project Settings > API).
+    // ============================================================
+    const SUPABASE_URL = "https://qiefxgpbunjnncajlleo.supabase.co/rest/v1/";
+    const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFpZWZ4Z3BidW5qbm5jYWpsbGVvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODg1ODY5MDEsImV4cCI6MjEwNDE2MjkwMX0.HzG4fV8zXeTCatkjpCo_cxPr0tWkbX3yQw-6_fHNNVw";
+
+    const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
     // Auto redirect jika sudah memiliki sesi aktif
     const activeSession = JSON.parse(localStorage.getItem("akasora_session"));
@@ -142,17 +147,45 @@
       lucide.createIcons();
     }
 
-    function handleLogin(e) {
+    function setLoginLoading(isLoading) {
+      const btn = document.getElementById("btn-login");
+      const icon = document.getElementById("btn-login-icon");
+      const text = document.getElementById("btn-login-text");
+      btn.disabled = isLoading;
+      text.innerText = isLoading ? "Memeriksa..." : "Masuk ke Sistem";
+      icon.setAttribute("data-lucide", isLoading ? "loader-2" : "log-in");
+      icon.classList.toggle("animate-spin", isLoading);
+      lucide.createIcons();
+    }
+
+    async function handleLogin(e) {
       if (e) e.preventDefault();
       const u = document.getElementById("username").value.trim().toLowerCase();
       const p = document.getElementById("password").value.trim();
       const errorBox = document.getElementById("login-error");
+      const errorMsg = document.getElementById("login-error-msg");
 
-      const targetUser = USER_DATABASE[u];
+      errorBox.classList.add("hidden");
+      setLoginLoading(true);
 
-      if (targetUser && targetUser.password === p) {
-        errorBox.classList.add("hidden");
+      // Verifikasi username & password langsung ke Supabase (function verify_login)
+      const { data, error } = await supabaseClient.rpc("verify_login", {
+        p_username: u,
+        p_password: p
+      });
 
+      setLoginLoading(false);
+
+      if (error) {
+        console.error(error);
+        errorMsg.innerText = "Tidak dapat terhubung ke server. Coba lagi.";
+        errorBox.classList.remove("hidden");
+        return;
+      }
+
+      const targetUser = data && data.length > 0 ? data[0] : null;
+
+      if (targetUser) {
         // Simpan sesi login
         localStorage.setItem("akasora_session", JSON.stringify({
           username: u,
@@ -164,6 +197,7 @@
         // Pindah ke file antarmuka masing-masing role
         window.location.href = targetUser.redirect;
       } else {
+        errorMsg.innerText = "Username atau Password salah!";
         errorBox.classList.remove("hidden");
       }
     }
