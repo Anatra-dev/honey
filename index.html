@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Login - Akasora POS Madu Akasia</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&display=swap" rel="stylesheet">
+  <style>
+    body { font-family: 'Plus Jakarta Sans', sans-serif; }
+    .font-display { font-family: 'Fraunces', serif; font-feature-settings: 'ss01'; }
+
+    /* ===== Latar honeycomb halus ===== */
+    .honeycomb-bg {
+      background-image: radial-gradient(circle at 1px 1px, rgba(217,142,43,0.18) 1px, transparent 0);
+      background-size: 28px 28px;
+    }
+
+    /* ===== Animasi ===== */
+    @keyframes blobFloat {
+      0%, 100% { transform: translate(0,0) scale(1); }
+      33% { transform: translate(18px,-14px) scale(1.08); }
+      66% { transform: translate(-14px,10px) scale(0.95); }
+    }
+    .animate-blob-a { animation: blobFloat 11s ease-in-out infinite; }
+    .animate-blob-b { animation: blobFloat 13s ease-in-out infinite reverse; }
+
+    @keyframes cardIn {
+      0% { opacity: 0; transform: translateY(18px) scale(0.98); }
+      100% { opacity: 1; transform: translateY(0) scale(1); }
+    }
+    .animate-cardIn { animation: cardIn 0.6s cubic-bezier(.22,1,.36,1) both; }
+
+    @keyframes logoGlow {
+      0%, 100% { box-shadow: 0 0 0 0 rgba(232,168,63,0.45), 0 10px 30px -8px rgba(217,142,43,0.6); }
+      50% { box-shadow: 0 0 0 10px rgba(232,168,63,0), 0 10px 30px -8px rgba(217,142,43,0.6); }
+    }
+    .animate-logoGlow { animation: logoGlow 2.4s ease-out infinite; }
+
+    @keyframes shakeX {
+      10%, 90% { transform: translateX(-1px); }
+      20%, 80% { transform: translateX(2px); }
+      30%, 50%, 70% { transform: translateX(-4px); }
+      40%, 60% { transform: translateX(4px); }
+    }
+    #login-error:not(.hidden) { animation: shakeX 0.5s cubic-bezier(.36,.07,.19,.97) both, cardIn 0.3s ease both; }
+
+    @keyframes inputPulse {
+      0% { box-shadow: 0 0 0 0 rgba(217,142,43,0.25); }
+      100% { box-shadow: 0 0 0 6px rgba(217,142,43,0); }
+    }
+    input:focus { animation: inputPulse 0.6s ease-out; }
+  </style>
+</head>
+<body class="bg-stone-950 text-stone-800 antialiased h-[100dvh] flex items-center justify-center p-4 relative overflow-hidden select-none">
+
+  <!-- Efek Cahaya Latar Belakang -->
+  <div class="absolute inset-0 honeycomb-bg opacity-40 pointer-events-none"></div>
+  <div class="absolute w-96 h-96 bg-amber-500/20 rounded-full blur-3xl -top-16 -left-16 pointer-events-none animate-blob-a"></div>
+  <div class="absolute w-96 h-96 bg-amber-700/20 rounded-full blur-3xl -bottom-16 -right-16 pointer-events-none animate-blob-b"></div>
+
+  <!-- Kartu Form Login -->
+  <div class="animate-cardIn relative w-full max-w-sm bg-stone-900/90 border border-stone-800 rounded-3xl p-7 sm:p-8 shadow-2xl backdrop-blur-xl">
+    
+    <!-- Logo & Judul -->
+    <div class="flex flex-col items-center text-center mb-6">
+      <div class="animate-logoGlow w-14 h-14 rounded-2xl bg-gradient-to-tr from-amber-600 to-amber-400 flex items-center justify-center text-stone-950 mb-3">
+        <i data-lucide="droplet" class="w-7 h-7 fill-stone-950"></i>
+      </div>
+      <h1 class="font-display text-2xl font-semibold tracking-wide text-white">Akasora POS</h1>
+      <p class="text-xs text-amber-400 font-semibold uppercase tracking-wider mt-0.5">Madu Akasia Riau</p>
+    </div>
+
+    <!-- Alert Error Notifikasi -->
+    <div id="login-error" class="hidden mb-4 p-3 rounded-xl bg-rose-500/10 border border-rose-500/30 text-rose-400 text-xs flex items-center gap-2">
+      <i data-lucide="alert-circle" class="w-4 h-4 shrink-0"></i>
+      <span id="login-error-msg">Username atau Password salah!</span>
+    </div>
+
+    <!-- Form Login Utama -->
+    <form onsubmit="handleLogin(event)" class="space-y-4 text-xs">
+      <div>
+        <label class="block font-bold text-stone-300 mb-1.5 uppercase text-[10px] tracking-wider">Username Pengguna</label>
+        <div class="relative">
+          <i data-lucide="user" class="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-stone-500"></i>
+          <input type="text" id="username" required placeholder="Masukkan username" autocomplete="off"
+            class="w-full bg-stone-800/80 border border-stone-700 text-white rounded-xl pl-10 pr-4 py-3 focus:border-amber-500 focus:bg-stone-800 focus:outline-none transition-colors duration-200">
+        </div>
+      </div>
+
+      <div>
+        <label class="block font-bold text-stone-300 mb-1.5 uppercase text-[10px] tracking-wider">Password Sandi</label>
+        <div class="relative">
+          <i data-lucide="lock" class="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-stone-500"></i>
+          <input type="password" id="password" required placeholder="Masukkan password"
+            class="w-full bg-stone-800/80 border border-stone-700 text-white rounded-xl pl-10 pr-10 py-3 focus:border-amber-500 focus:bg-stone-800 focus:outline-none transition-colors duration-200">
+          <button type="button" onclick="togglePasswordVisibility()" class="absolute right-3.5 top-1/2 -translate-y-1/2 text-stone-500 hover:text-amber-400 transition-colors">
+            <i data-lucide="eye" id="eye-icon" class="w-4 h-4"></i>
+          </button>
+        </div>
+      </div>
+
+      <button type="submit" 
+        class="w-full py-3.5 bg-amber-600 hover:bg-amber-700 hover:-translate-y-0.5 hover:shadow-xl text-white font-bold rounded-xl shadow-lg shadow-amber-600/30 transition-all duration-200 active:scale-95 active:translate-y-0 flex items-center justify-center gap-2 mt-3 text-xs">
+        <i data-lucide="log-in" class="w-4 h-4"></i>
+        <span>Masuk ke Sistem</span>
+      </button>
+    </form>
+
+    <div class="mt-6 text-center">
+      <p class="text-[10px] text-stone-500">© Akasora POS • Sistem Kasir & Manajemen Stok</p>
+    </div>
+
+  </div>
+
+  <script>
+    // Database Akun (Dapat disesuaikan kredensialnya di sini)
+    const USER_DATABASE = {
+      "admin": { password: "admin123", role: "admin", redirect: "admin.html", name: "Administrator" },
+      "kasir": { password: "kasir123", role: "user", redirect: "user.html", name: "Staff Kasir" }
+    };
+
+    // Auto redirect jika sudah memiliki sesi aktif
+    const activeSession = JSON.parse(localStorage.getItem("akasora_session"));
+    if (activeSession) {
+      if (activeSession.role === "admin") window.location.href = "admin.html";
+      else if (activeSession.role === "user") window.location.href = "user.html";
+    }
+
+    function togglePasswordVisibility() {
+      const passInput = document.getElementById("password");
+      const eyeIcon = document.getElementById("eye-icon");
+      if (passInput.type === "password") {
+        passInput.type = "text";
+        eyeIcon.setAttribute("data-lucide", "eye-off");
+      } else {
+        passInput.type = "password";
+        eyeIcon.setAttribute("data-lucide", "eye");
+      }
+      lucide.createIcons();
+    }
+
+    function handleLogin(e) {
+      if (e) e.preventDefault();
+      const u = document.getElementById("username").value.trim().toLowerCase();
+      const p = document.getElementById("password").value.trim();
+      const errorBox = document.getElementById("login-error");
+
+      const targetUser = USER_DATABASE[u];
+
+      if (targetUser && targetUser.password === p) {
+        errorBox.classList.add("hidden");
+
+        // Simpan sesi login
+        localStorage.setItem("akasora_session", JSON.stringify({
+          username: u,
+          role: targetUser.role,
+          name: targetUser.name,
+          loggedInAt: new Date().toISOString()
+        }));
+
+        // Pindah ke file antarmuka masing-masing role
+        window.location.href = targetUser.redirect;
+      } else {
+        errorBox.classList.remove("hidden");
+      }
+    }
+
+    lucide.createIcons();
+  </script>
+</body>
+</html>
