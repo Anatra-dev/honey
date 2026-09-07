@@ -16,20 +16,17 @@
     ::-webkit-scrollbar { width: 4px; height: 4px; }
     ::-webkit-scrollbar-thumb { background: #e5c78a; border-radius: 4px; }
 
-    /* ===== Latar honeycomb halus untuk sidebar ===== */
     .honeycomb-bg {
       background-image: radial-gradient(circle at 1px 1px, rgba(217,142,43,0.12) 1px, transparent 0);
       background-size: 24px 24px;
     }
 
-    /* ===== Transisi perpindahan tab / halaman ===== */
     @keyframes fadeInUp {
       0% { opacity: 0; transform: translateY(10px); }
       100% { opacity: 1; transform: translateY(0); }
     }
     .view-panel:not(.hidden) { animation: fadeInUp 0.35s ease both; }
 
-    /* ===== Transisi modal ===== */
     @keyframes modalCardIn {
       0% { opacity: 0; transform: translateY(14px) scale(0.96); }
       100% { opacity: 1; transform: translateY(0) scale(1); }
@@ -38,40 +35,29 @@
     .modal-panel:not(.hidden) { animation: modalBgIn 0.2s ease both; }
     .modal-panel:not(.hidden) > div { animation: modalCardIn 0.28s cubic-bezier(.22,1,.36,1) both; }
 
-    /* ===== Stagger masuk untuk kartu & baris yang di-render ulang ===== */
     #pos-product-grid > div, #dash-inventory-cards > div { animation: fadeInUp 0.35s ease both; }
-    #pos-product-grid > div:nth-child(1), #dash-inventory-cards > div:nth-child(1) { animation-delay: .02s; }
-    #pos-product-grid > div:nth-child(2), #dash-inventory-cards > div:nth-child(2) { animation-delay: .05s; }
-    #pos-product-grid > div:nth-child(3), #dash-inventory-cards > div:nth-child(3) { animation-delay: .08s; }
-    #pos-product-grid > div:nth-child(4), #dash-inventory-cards > div:nth-child(4) { animation-delay: .11s; }
-    #pos-product-grid > div:nth-child(5), #dash-inventory-cards > div:nth-child(5) { animation-delay: .14s; }
-    #pos-product-grid > div:nth-child(6), #dash-inventory-cards > div:nth-child(6) { animation-delay: .17s; }
     #pos-cart-list > div { animation: fadeInUp 0.25s ease both; }
     #rekap-table-body > tr, #stok-history-tbody > tr { animation: fadeInUp 0.3s ease both; }
 
-    /* ===== Kartu & tombol interaktif ===== */
     #pos-product-grid > div { transition: transform .18s ease, box-shadow .18s ease, border-color .18s ease; }
     #pos-product-grid > div:hover { transform: translateY(-3px); box-shadow: 0 10px 24px -10px rgba(217,142,43,0.35); }
     .d-nav { transition: background-color .18s ease, color .18s ease, transform .12s ease; }
     .d-nav:hover { background-color: rgba(217,142,43,0.12); transform: translateX(2px); }
     .d-nav.bg-amber-600 { box-shadow: 0 8px 18px -6px rgba(217,142,43,0.55); }
 
-    /* ===== Nomor statistik ditonjolkan dengan tipografi display ===== */
     #dash-total-omzet, #dash-total-laba, #dash-total-volume, #dash-total-pembayaran,
-    #pos-total-price, #omzet-total-gross, #omzet-total-hpp, #omzet-total-margin {
+    #pos-total-price, #omzet-total-gross, #omzet-total-hpp, #omzet-total-margin,
+    #dash-month-omzet, #dash-month-hpp, #dash-month-margin {
       font-family: 'Fraunces', serif;
     }
 
-    /* ===== Hover lembut untuk kartu ringkasan statistik ===== */
     .bg-white.rounded-2xl, .bg-white.rounded-3xl { transition: transform .2s ease, box-shadow .2s ease; }
     .bg-white.rounded-2xl:hover, .bg-white.rounded-3xl:hover { transform: translateY(-2px); box-shadow: 0 12px 28px -14px rgba(120,90,40,0.25); }
-
-    /* ===== Floating cart mobile: masuk dengan animasi pegas ===== */
   </style>
 </head>
 <body class="bg-stone-100 text-stone-800 antialiased h-[100dvh] flex flex-col md:flex-row overflow-hidden select-none">
 
-  <!-- HEADER MOBILE LENGKAP DENGAN TOMBOL LOGOUT -->
+  <!-- HEADER MOBILE -->
   <header class="md:hidden bg-stone-900 text-white px-4 py-3 flex items-center justify-between border-b border-stone-800 z-30 shrink-0">
     <div class="flex items-center gap-2">
       <div class="w-8 h-8 rounded-xl bg-amber-500 text-stone-950 flex items-center justify-center font-black">
@@ -88,7 +74,7 @@
     </button>
   </header>
 
-  <!-- SIDEBAR DESKTOP/TABLET LENGKAP DENGAN TOMBOL LOGOUT -->
+  <!-- SIDEBAR DESKTOP -->
   <aside class="hidden md:flex md:w-64 bg-stone-900 text-white flex-col justify-between border-r border-stone-800 z-20 shrink-0 relative overflow-hidden">
     <div class="absolute inset-0 honeycomb-bg opacity-[0.15] pointer-events-none"></div>
     <div class="relative">
@@ -111,7 +97,6 @@
       </nav>
     </div>
 
-    <!-- User Profile Card & Tombol Logout Desktop -->
     <div class="p-3 m-3 bg-stone-800/80 rounded-2xl border border-stone-700/50 flex flex-col gap-2.5">
       <div class="flex items-center gap-2.5">
         <div class="w-8 h-8 rounded-xl bg-amber-500/20 text-amber-400 flex items-center justify-center font-bold text-xs">
@@ -147,6 +132,23 @@
         </div>
       </div>
 
+      <!-- 3 KARTU REKAP BULANAN PINDAHAN DARI ROLE USER -->
+      <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+        <div class="bg-white p-4 rounded-2xl border border-stone-200/80 shadow-sm">
+          <span class="text-[10px] font-bold uppercase text-stone-400">Omzet Bulan Ini</span>
+          <h3 id="dash-month-omzet" class="text-xl font-black mt-1.5">Rp 0</h3>
+        </div>
+        <div class="bg-white p-4 rounded-2xl border border-stone-200/80 shadow-sm">
+          <span class="text-[10px] font-bold uppercase text-stone-400">HPP Bulan Ini</span>
+          <h3 id="dash-month-hpp" class="text-xl font-black text-rose-600 mt-1.5">Rp 0</h3>
+        </div>
+        <div class="bg-amber-600 text-white p-4 rounded-2xl shadow-sm">
+          <span class="text-[10px] font-bold uppercase text-amber-100">Margin Bulan Ini</span>
+          <h3 id="dash-month-margin" class="text-xl font-black mt-1.5">Rp 0</h3>
+        </div>
+      </div>
+
+      <!-- 4 KARTU STATISTIK ADMIN -->
       <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
         <div class="bg-white p-4 rounded-2xl border border-stone-100 shadow-sm">
           <span class="text-[10px] font-bold uppercase text-stone-400">Total Omzet</span>
@@ -169,7 +171,6 @@
         </div>
       </div>
 
-      <!-- Tabel Kelola Master Katalog & Stok (Admin Edit) -->
       <div class="bg-white rounded-2xl sm:rounded-3xl p-5 border border-stone-100 shadow-sm">
         <h3 class="font-bold text-stone-800 text-sm flex items-center gap-2 mb-3"><i data-lucide="archive" class="w-4 h-4 text-amber-600"></i><span>Kelola Stok & Harga Master Madu (Admin Edit)</span></h3>
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3" id="dash-inventory-cards"></div>
@@ -179,8 +180,6 @@
     <!-- 2. POS CASHIER -->
     <section id="view-pos" class="view-panel flex-1 overflow-y-auto md:overflow-hidden flex flex-col md:flex-row p-3 sm:p-6 gap-4 hidden pb-20 md:pb-6">
       <div class="flex flex-col bg-white rounded-3xl border border-stone-200/80 shadow-sm md:flex-1 md:h-full md:overflow-hidden">
-        
-        <!-- BANNER NAMA CUSTOMER EYE-CATCHING -->
         <div class="p-4 bg-gradient-to-r from-amber-500/15 via-amber-100/40 to-stone-50 border-b-2 border-amber-400/70 flex flex-col sm:flex-row items-center justify-between gap-3">
           <div class="flex items-center gap-3 w-full sm:w-auto">
             <div class="w-11 h-11 rounded-2xl bg-amber-600 text-white flex items-center justify-center shadow-lg shadow-amber-600/30 shrink-0">
@@ -202,7 +201,6 @@
         </div>
       </div>
 
-      <!-- Keranjang / Rekap Pesanan Kasir (selalu tampil, di bawah pada HP, di samping pada layar besar) -->
       <aside class="flex flex-col md:w-80 lg:w-96 bg-white rounded-3xl border border-stone-200 shadow-sm shrink-0 md:h-full md:overflow-hidden">
         <div class="p-4 border-b border-stone-100 flex justify-between items-center">
           <h3 class="font-bold text-stone-800 text-sm flex items-center gap-2"><i data-lucide="receipt" class="w-4 h-4 text-amber-600"></i><span>Rekap Pesanan Kasir</span></h3>
@@ -222,12 +220,12 @@
       </aside>
     </section>
 
-    <!-- 3. REKAP PENJUALAN (ADMIN BISA EDIT & HAPUS) -->
+    <!-- 3. REKAP PENJUALAN (LENGKAP DENGAN EDIT & HAPUS) -->
     <section id="view-rekap" class="view-panel flex-1 overflow-y-auto p-4 sm:p-6 pb-20 md:pb-6 space-y-4 hidden">
       <div class="flex flex-col sm:flex-row justify-between sm:items-center gap-3">
         <div>
           <h2 class="font-display text-xl sm:text-2xl font-semibold text-stone-800">Rekap Penjualan Bulanan</h2>
-          <p class="text-[11px] sm:text-xs text-stone-400">Data transaksi diambil langsung dari Supabase, tidak bisa diubah manual — tandai status vendor bila sudah disetor.</p>
+          <p class="text-[11px] sm:text-xs text-stone-400">Data transaksi kasir — Admin memiliki hak penuh untuk edit data atau hapus transaksi.</p>
         </div>
         <div class="flex items-center gap-2">
           <input type="month" id="rekap-month-picker" onchange="onMonthChange(this.value)" class="bg-white border border-stone-200 rounded-xl px-3 py-2 text-xs font-bold text-stone-700">
@@ -237,7 +235,7 @@
       </div>
       <div class="bg-white rounded-2xl border border-stone-200 shadow-sm overflow-hidden">
         <div class="overflow-x-auto">
-          <table class="w-full text-left text-xs min-w-[700px]">
+          <table class="w-full text-left text-xs min-w-[780px]">
             <thead class="bg-stone-50 text-stone-500 font-bold uppercase text-[10px] border-b">
               <tr>
                 <th class="p-3.5">Nota & Tanggal</th>
@@ -247,6 +245,7 @@
                 <th class="p-3.5 text-right">HPP</th>
                 <th class="p-3.5 text-right">Laba</th>
                 <th class="p-3.5 text-center">Status Vendor</th>
+                <th class="p-3.5 text-center">Aksi Admin</th>
               </tr>
             </thead>
             <tbody id="rekap-table-body" class="divide-y divide-stone-100"></tbody>
@@ -278,7 +277,7 @@
       </div>
     </section>
 
-    <!-- 5. INPUT STOK & RIWAYAT (ADMIN BISA EDIT) -->
+    <!-- 5. INPUT STOK & RIWAYAT -->
     <section id="view-stok" class="view-panel flex-1 overflow-y-auto p-4 sm:p-6 pb-20 md:pb-6 space-y-4 hidden">
       <h2 class="font-display text-xl sm:text-2xl font-semibold text-stone-800">Stok Masuk & Penyuplai</h2>
       <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
@@ -308,12 +307,12 @@
       </div>
     </section>
 
-    <!-- 5. MANAJEMEN PENGGUNA (KONTROL AKSES ADMIN) -->
+    <!-- 6. MANAJEMEN PENGGUNA -->
     <section id="view-users" class="view-panel flex-1 overflow-y-auto p-4 sm:p-6 pb-20 md:pb-6 space-y-4 hidden">
       <div class="flex flex-col sm:flex-row justify-between sm:items-center gap-3">
         <div>
           <h2 class="font-display text-xl sm:text-2xl font-semibold text-stone-800">Manajemen Pengguna</h2>
-          <p class="text-[11px] sm:text-xs text-stone-400">Kelola akun, kata sandi, dan hak akses (role) pengguna sistem.</p>
+          <p class="text-[11px] sm:text-xs text-stone-400">Kelola akun, kata sandi, dan hak akses pengguna sistem.</p>
         </div>
         <button onclick="openAddUserModal()" class="px-3.5 py-2 bg-amber-600 hover:bg-amber-700 hover:-translate-y-0.5 hover:shadow-lg active:translate-y-0 active:scale-95 text-white rounded-xl text-xs font-bold shadow-md flex items-center gap-1.5 transition-all duration-200 shrink-0"><i data-lucide="user-plus" class="w-4 h-4"></i><span>Tambah Pengguna</span></button>
       </div>
@@ -344,6 +343,43 @@
     <button onclick="navigateTab('stok')" class="m-nav text-center py-1 text-stone-400"><i data-lucide="boxes" class="w-4 h-4 mx-auto"></i><span class="text-[9px] block font-bold">Stok</span></button>
     <button onclick="navigateTab('users')" class="m-nav text-center py-1 text-stone-400"><i data-lucide="users" class="w-4 h-4 mx-auto"></i><span class="text-[9px] block font-bold">Pengguna</span></button>
   </nav>
+
+  <!-- MODAL EDIT TRANSAKSI (ADMIN) -->
+  <div id="modal-edit-transaction" class="modal-panel fixed inset-0 z-50 bg-stone-900/60 backdrop-blur-sm flex items-center justify-center p-4 hidden">
+    <div class="bg-white w-full max-w-sm rounded-3xl p-5 shadow-2xl space-y-3 text-xs">
+      <h3 class="font-extrabold text-sm text-stone-800">Edit Data Transaksi</h3>
+      <input type="hidden" id="edit-tx-id">
+      <div>
+        <label class="font-bold block mb-1">No Invoice</label>
+        <input type="text" id="edit-tx-invoice" disabled class="w-full bg-stone-100 border p-2 rounded-xl text-stone-500 font-mono">
+      </div>
+      <div>
+        <label class="font-bold block mb-1">Nama Customer</label>
+        <input type="text" id="edit-tx-customer" class="w-full border p-2 rounded-xl font-bold">
+      </div>
+      <div class="grid grid-cols-2 gap-2">
+        <div>
+          <label class="font-bold block mb-1">Total Omzet (Rp)</label>
+          <input type="number" id="edit-tx-total" class="w-full border p-2 rounded-xl font-bold">
+        </div>
+        <div>
+          <label class="font-bold block mb-1">Total HPP (Rp)</label>
+          <input type="number" id="edit-tx-hpp" class="w-full border p-2 rounded-xl font-bold">
+        </div>
+      </div>
+      <div>
+        <label class="font-bold block mb-1">Status Pembayaran Vendor</label>
+        <select id="edit-tx-vendor" class="w-full border p-2 rounded-xl font-bold">
+          <option value="Belum Lunas">Belum Lunas</option>
+          <option value="Lunas">Lunas</option>
+        </select>
+      </div>
+      <div class="flex gap-2 pt-2">
+        <button onclick="closeEditTransactionModal()" class="flex-1 py-2.5 border rounded-xl font-bold">Batal</button>
+        <button onclick="saveEditTransaction()" class="flex-1 py-2.5 bg-amber-600 text-white rounded-xl font-bold">Simpan Perubahan</button>
+      </div>
+    </div>
+  </div>
 
   <!-- MODAL EDIT HARGA KERANJANG -->
   <div id="modal-edit-cart-price" class="modal-panel fixed inset-0 z-50 bg-stone-900/60 backdrop-blur-sm flex items-center justify-center p-4 hidden">
@@ -411,19 +447,16 @@
   </div>
 
   <script>
-    // ===== KONEKSI SUPABASE =====
     const SUPABASE_URL = 'https://qiefxgpbunjnncajlleo.supabase.co';
     const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFpZWZ4Z3BidW5qbm5jYWpsbGVvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODg1ODY5MDEsImV4cCI6MjEwNDE2MjkwMX0.HzG4fV8zXeTCatkjpCo_cxPr0tWkbX3yQw-6_fHNNVw';
     const sbClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-    // 1. AUTH GUARD ADMINISTRATOR
     const currentSession = JSON.parse(localStorage.getItem("akasora_session"));
     if (!currentSession || !currentSession.token || currentSession.role !== "admin") {
       alert("Akses ditolak! Halaman ini hanya dapat diakses oleh Administrator.");
       window.location.href = "index.html";
     }
 
-    // 2. FUNGSI LOGOUT
     function logout() {
       if (confirm("Apakah Anda yakin ingin keluar dari akun Administrator?")) {
         sbClient.rpc('logout_user', { p_token: currentSession.token });
@@ -432,7 +465,6 @@
       }
     }
 
-    // Helper pemanggil RPC Supabase dengan penanganan error seragam
     async function rpc(name, params) {
       const { data, error } = await sbClient.rpc(name, params);
       if (error) {
@@ -447,11 +479,10 @@
     let usersCache = [];
     let cart = [];
     let activeEditCartId = null;
-    let selectedMonth = new Date().toISOString().slice(0, 7); // format YYYY-MM
+    let selectedMonth = new Date().toISOString().slice(0, 7);
     const formatRp = (n) => "Rp " + Number(n || 0).toLocaleString("id-ID");
     const formatTgl = (iso) => new Date(iso).toLocaleString('id-ID', { dateStyle: 'short', timeStyle: 'short' });
 
-    // ===== MUAT DATA DARI SUPABASE =====
     async function loadCatalog() {
       const rows = await rpc('list_products', { p_token: currentSession.token });
       appData.catalog = (rows || []).map(p => ({
@@ -503,7 +534,6 @@
       renderDashboard(); renderRekapTable(); renderOmzetPage();
     }
 
-    // ===== EXPORT KE SPREADSHEET (XLSX) =====
     function exportMonthlyExcel() {
       const txs = transactionsForMonth(selectedMonth);
       if (txs.length === 0) return alert('Tidak ada transaksi pada bulan yang dipilih.');
@@ -540,151 +570,7 @@
       lucide.createIcons();
     }
 
-    // ===== MANAJEMEN PENGGUNA (KONTROL AKSES ADMIN) =====
-    function roleLabel(code) {
-      const r = rolesCache.find(x => x.code === code);
-      return r ? r.label : code;
-    }
-    function managerRoleCodes() {
-      return rolesCache.filter(r => r.can_manage_users).map(r => r.code);
-    }
-
-    async function renderUsersTable() {
-      usersCache = await rpc('list_users', { p_token: currentSession.token });
-      const rows = usersCache.map(u => {
-        const isSelf = currentSession.username === u.username;
-        const isManager = managerRoleCodes().includes(u.role_code);
-        return `
-        <tr class="hover:bg-stone-50">
-          <td class="p-3 font-mono font-bold text-stone-800">${u.username}${isSelf ? ' <span class="text-[9px] text-amber-600 font-bold">(Anda)</span>' : ''}</td>
-          <td class="p-3 font-bold text-stone-700">${u.full_name || '-'}</td>
-          <td class="p-3 text-center"><span class="px-2 py-0.5 rounded text-[10px] font-bold ${isManager ? 'bg-amber-100 text-amber-800' : 'bg-stone-100 text-stone-700'}">${roleLabel(u.role_code)}</span></td>
-          <td class="p-3 text-center">
-            <div class="flex items-center justify-center gap-1.5">
-              <button onclick="openEditUserModal('${u.username}')" class="p-1.5 bg-stone-100 hover:bg-stone-200 rounded-lg text-stone-700"><i data-lucide="edit" class="w-3.5 h-3.5"></i></button>
-              <button onclick="deleteUser('${u.username}')" class="p-1.5 bg-rose-50 hover:bg-rose-100 rounded-lg text-rose-600"><i data-lucide="trash-2" class="w-3.5 h-3.5"></i></button>
-            </div>
-          </td>
-        </tr>`;
-      }).join('');
-      document.getElementById('users-table-body').innerHTML = rows || `<tr><td colspan="4" class="p-6 text-center text-stone-400">Belum ada data pengguna.</td></tr>`;
-      lucide.createIcons();
-    }
-
-    function fillRoleSelect(selectedCode) {
-      const sel = document.getElementById('user-role');
-      sel.innerHTML = rolesCache.map(r => `<option value="${r.code}">${r.label}</option>`).join('');
-      sel.value = selectedCode || (rolesCache.find(r => !r.can_manage_users)?.code || rolesCache[0]?.code);
-    }
-
-    function showUserFormError(msg) {
-      const el = document.getElementById('user-form-error');
-      el.innerText = msg;
-      el.classList.remove('hidden');
-    }
-    function clearUserFormError() {
-      document.getElementById('user-form-error').classList.add('hidden');
-    }
-
-    function toggleUserPasswordVisibility() {
-      const input = document.getElementById('user-password');
-      const icon = document.getElementById('user-password-eye');
-      if (input.type === 'password') { input.type = 'text'; icon.setAttribute('data-lucide', 'eye-off'); }
-      else { input.type = 'password'; icon.setAttribute('data-lucide', 'eye'); }
-      lucide.createIcons();
-    }
-
-    function openAddUserModal() {
-      clearUserFormError();
-      document.getElementById('modal-user-title').innerText = 'Tambah Pengguna Baru';
-      document.getElementById('user-original-username').value = '';
-      document.getElementById('user-username').value = '';
-      document.getElementById('user-username').disabled = false;
-      document.getElementById('user-fullname').value = '';
-      document.getElementById('user-password').value = '';
-      document.getElementById('user-password').type = 'password';
-      document.getElementById('user-password-eye').setAttribute('data-lucide', 'eye');
-      document.getElementById('user-password-hint').innerText = '';
-      fillRoleSelect(null);
-      document.getElementById('modal-user').classList.remove('hidden');
-      lucide.createIcons();
-    }
-
-    function openEditUserModal(username) {
-      const u = usersCache.find(x => x.username === username);
-      if (!u) return;
-      clearUserFormError();
-      document.getElementById('modal-user-title').innerText = 'Edit Data Pengguna';
-      document.getElementById('user-original-username').value = username;
-      document.getElementById('user-username').value = username;
-      document.getElementById('user-username').disabled = true;
-      document.getElementById('user-fullname').value = u.full_name || '';
-      document.getElementById('user-password').value = '';
-      document.getElementById('user-password').type = 'password';
-      document.getElementById('user-password-eye').setAttribute('data-lucide', 'eye');
-      document.getElementById('user-password-hint').innerText = '(kosongkan jika tidak diubah)';
-      fillRoleSelect(u.role_code);
-      document.getElementById('modal-user').classList.remove('hidden');
-      lucide.createIcons();
-    }
-
-    function closeUserModal() { document.getElementById('modal-user').classList.add('hidden'); }
-
-    async function saveUser() {
-      clearUserFormError();
-      const originalUsername = document.getElementById('user-original-username').value;
-      const isEdit = !!originalUsername;
-      const username = document.getElementById('user-username').value.trim().toLowerCase();
-      const name = document.getElementById('user-fullname').value.trim();
-      const password = document.getElementById('user-password').value;
-      const role = document.getElementById('user-role').value;
-
-      if (!username || !/^[a-z0-9._-]+$/.test(username)) {
-        return showUserFormError('Username wajib diisi (huruf, angka, ".", "_", "-" saja, tanpa spasi).');
-      }
-      if (!name) return showUserFormError('Nama lengkap wajib diisi.');
-      if (!isEdit && !password) return showUserFormError('Password wajib diisi untuk pengguna baru.');
-
-      // Cegah menurunkan role diri sendiri sehingga tidak ada admin/manajer tersisa
-      if (isEdit && originalUsername === currentSession.username && !managerRoleCodes().includes(role)) {
-        const otherManagers = usersCache.filter(u => u.username !== originalUsername && managerRoleCodes().includes(u.role_code));
-        if (otherManagers.length === 0) {
-          return showUserFormError('Tidak dapat mengubah role akun sendiri karena ini satu-satunya Administrator.');
-        }
-      }
-
-      try {
-        if (isEdit) {
-          await rpc('update_user', { p_token: currentSession.token, p_username: originalUsername, p_full_name: name, p_role_code: role, p_new_password: password || null });
-          if (originalUsername === currentSession.username) {
-            currentSession.name = name; currentSession.role = role;
-            localStorage.setItem('akasora_session', JSON.stringify(currentSession));
-          }
-        } else {
-          await rpc('create_user', { p_token: currentSession.token, p_username: username, p_password: password, p_full_name: name, p_role_code: role });
-        }
-      } catch (e) { return; }
-
-      closeUserModal();
-      renderUsersTable();
-    }
-
-    async function deleteUser(username) {
-      if (username === currentSession.username) {
-        return alert('Anda tidak dapat menghapus akun yang sedang digunakan sendiri.');
-      }
-      const managers = usersCache.filter(u => managerRoleCodes().includes(u.role_code));
-      const target = usersCache.find(u => u.username === username);
-      if (target && managerRoleCodes().includes(target.role_code) && managers.length <= 1) {
-        return alert('Tidak dapat menghapus Administrator terakhir dalam sistem.');
-      }
-      if (confirm(`Hapus akun pengguna "${username}" secara permanen?`)) {
-        try { await rpc('delete_user', { p_token: currentSession.token, p_username: username }); } catch (e) { return; }
-        renderUsersTable();
-      }
-    }
-
-    // ===== DASHBOARD =====
+    // DASHBOARD & 3 KARTU REKAP BULANAN
     function renderDashboard() {
       let o = 0, h = 0, g = 0, c5 = 0, c1 = 0, ht = 0, ch = 0;
       transactionsForMonth(selectedMonth).forEach(t => {
@@ -693,6 +579,13 @@
         t.items.forEach(i => { g += (i.weightG * i.qty); if (i.weightG === 500) c5 += i.qty; if (i.weightG === 1000) c1 += i.qty; });
       });
       const laba = o - h;
+
+      // 3 Kartu Ringkasan Bulanan (Pindahan dari User)
+      document.getElementById('dash-month-omzet').innerText = formatRp(o);
+      document.getElementById('dash-month-hpp').innerText = formatRp(h);
+      document.getElementById('dash-month-margin').innerText = formatRp(laba);
+
+      // 4 Kartu Statistik Admin
       document.getElementById('dash-total-omzet').innerText = formatRp(o);
       document.getElementById('dash-total-laba').innerText = formatRp(laba);
       document.getElementById('dash-avg-margin').innerText = `Margin: ${o > 0 ? ((laba / o) * 100).toFixed(1) : 0}%`;
@@ -714,33 +607,97 @@
       lucide.createIcons();
     }
 
-    function openEditCatalogModal(id) {
-      const p = appData.catalog.find(x => x.id === id);
-      if (!p) return;
-      document.getElementById('edit-cat-id').value = p.id;
-      document.getElementById('edit-cat-name').value = p.name;
-      document.getElementById('edit-cat-price').value = p.price;
-      document.getElementById('edit-cat-hpp').value = p.hpp;
-      document.getElementById('edit-cat-stock').value = p.stock;
-      document.getElementById('modal-edit-catalog').classList.remove('hidden');
-    }
-    function closeEditCatalogModal() { document.getElementById('modal-edit-catalog').classList.add('hidden'); }
-    async function saveEditCatalog() {
-      const id = document.getElementById('edit-cat-id').value;
-      const name = document.getElementById('edit-cat-name').value.trim();
-      const price = parseInt(document.getElementById('edit-cat-price').value);
-      const hpp = parseInt(document.getElementById('edit-cat-hpp').value);
-      const stock = parseInt(document.getElementById('edit-cat-stock').value);
-      try {
-        await rpc('update_product', { p_token: currentSession.token, p_id: id, p_name: name, p_price: price, p_hpp: hpp, p_stock: stock });
-      } catch (e) { return; }
-      await loadCatalog();
-      closeEditCatalogModal();
-      renderDashboard();
-      renderPOS();
+    // REKAP PENJUALAN DENGAN TOMBOL EDIT & HAPUS
+    function renderRekapTable() {
+      const q = (document.getElementById('rekap-search').value || '').toLowerCase();
+      const filtered = transactionsForMonth(selectedMonth).filter(t => t.customer.toLowerCase().includes(q) || (t.code || '').toLowerCase().includes(q));
+      document.getElementById('rekap-table-body').innerHTML = filtered.map(t => `
+        <tr class="hover:bg-stone-50">
+          <td class="p-3 font-mono font-bold">${t.code}<br><span class="text-[9px] text-stone-400">${t.date}</span></td>
+          <td class="p-3 font-bold text-stone-800">${t.customer}</td>
+          <td class="p-3">${t.items.map(i => `${i.qty}x ${i.name}`).join(', ')}</td>
+          <td class="p-3 text-right font-black">${formatRp(t.totalNominal)}</td>
+          <td class="p-3 text-right text-rose-600">${formatRp(t.totalHpp)}</td>
+          <td class="p-3 text-right text-emerald-600 font-bold">${formatRp(t.labaKotor)}</td>
+          <td class="p-3 text-center">
+            <button onclick="toggleVendorStatus(${t.id}, '${t.vendorStatus}')" class="px-2 py-0.5 rounded text-[10px] font-bold ${t.vendorStatus === 'Lunas' ? 'bg-emerald-100 text-emerald-800' : 'bg-rose-100 text-rose-800'}">${t.vendorStatus}</button>
+          </td>
+          <td class="p-3 text-center">
+            <div class="flex items-center justify-center gap-1.5">
+              <button onclick="openEditTransactionModal(${t.id})" class="p-1.5 bg-stone-100 hover:bg-stone-200 rounded-lg text-stone-700" title="Edit Transaksi"><i data-lucide="edit" class="w-3.5 h-3.5"></i></button>
+              <button onclick="handleDeleteTransaction(${t.id}, '${t.code}')" class="p-1.5 bg-rose-50 hover:bg-rose-100 rounded-lg text-rose-600" title="Hapus Transaksi"><i data-lucide="trash-2" class="w-3.5 h-3.5"></i></button>
+            </div>
+          </td>
+        </tr>
+      `).join('');
+      lucide.createIcons();
     }
 
-    // ===== POS KASIR =====
+    function openEditTransactionModal(id) {
+      const t = appData.transactions.find(x => x.id === id);
+      if (!t) return;
+      document.getElementById('edit-tx-id').value = t.id;
+      document.getElementById('edit-tx-invoice').value = t.code;
+      document.getElementById('edit-tx-customer').value = t.customer;
+      document.getElementById('edit-tx-total').value = t.totalNominal;
+      document.getElementById('edit-tx-hpp').value = t.totalHpp;
+      document.getElementById('edit-tx-vendor').value = t.vendorStatus;
+      document.getElementById('modal-edit-transaction').classList.remove('hidden');
+    }
+
+    function closeEditTransactionModal() {
+      document.getElementById('modal-edit-transaction').classList.add('hidden');
+    }
+
+    async function saveEditTransaction() {
+      const id = parseInt(document.getElementById('edit-tx-id').value);
+      const cust = document.getElementById('edit-tx-customer').value.trim();
+      const tot = parseInt(document.getElementById('edit-tx-total').value);
+      const hpp = parseInt(document.getElementById('edit-tx-hpp').value);
+      const ven = document.getElementById('edit-tx-vendor').value;
+
+      try {
+        await rpc('update_transaction', {
+          p_token: currentSession.token,
+          p_id: id,
+          p_customer_name: cust,
+          p_total: tot,
+          p_total_hpp: hpp,
+          p_vendor_status: ven
+        });
+      } catch (e) { return; }
+
+      closeEditTransactionModal();
+      await loadTransactions();
+      renderRekapTable();
+      renderDashboard();
+    }
+
+    async function handleDeleteTransaction(id, code) {
+      if (confirm(`Hapus transaksi "${code}" secara permanen? Stok produk yang terjual akan otomatis dikembalikan ke inventaris.`)) {
+        try {
+          await rpc('delete_transaction', { p_token: currentSession.token, p_id: id });
+        } catch (e) { return; }
+
+        await Promise.all([loadCatalog(), loadTransactions()]);
+        renderRekapTable();
+        renderDashboard();
+      }
+    }
+
+    async function toggleVendorStatus(id, current) {
+      const t = appData.transactions.find(x => x.id === id);
+      if (!t) return;
+      const next = current === 'Lunas' ? 'Belum Lunas' : 'Lunas';
+      try {
+        await rpc('update_transaction', { p_token: currentSession.token, p_id: id, p_customer_name: t.customer, p_total: t.totalNominal, p_total_hpp: t.totalHpp, p_vendor_status: next });
+      } catch (e) { return; }
+      await loadTransactions();
+      renderRekapTable();
+      renderDashboard();
+    }
+
+    // POS KASIR
     function renderPOS() {
       document.getElementById('pos-product-grid').innerHTML = appData.catalog.map(p => `
         <div onclick="addToCart('${p.id}')" class="bg-stone-50 p-4 rounded-2xl border hover:border-amber-500 cursor-pointer flex flex-col justify-between group active:scale-95">
@@ -852,38 +809,6 @@
       renderPOS();
     }
 
-    // ===== REKAP PENJUALAN (read-only dari Supabase + toggle status vendor) =====
-    function renderRekapTable() {
-      const q = (document.getElementById('rekap-search').value || '').toLowerCase();
-      const filtered = transactionsForMonth(selectedMonth).filter(t => t.customer.toLowerCase().includes(q) || (t.code || '').toLowerCase().includes(q));
-      document.getElementById('rekap-table-body').innerHTML = filtered.map(t => `
-        <tr class="hover:bg-stone-50">
-          <td class="p-3 font-mono font-bold">${t.code}<br><span class="text-[9px] text-stone-400">${t.date}</span></td>
-          <td class="p-3 font-bold text-stone-800">${t.customer}</td>
-          <td class="p-3">${t.items.map(i => `${i.qty}x ${i.name}`).join(', ')}</td>
-          <td class="p-3 text-right font-black">${formatRp(t.totalNominal)}</td>
-          <td class="p-3 text-right text-rose-600">${formatRp(t.totalHpp)}</td>
-          <td class="p-3 text-right text-emerald-600 font-bold">${formatRp(t.labaKotor)}</td>
-          <td class="p-3 text-center">
-            <button onclick="toggleVendorStatus(${t.id}, '${t.vendorStatus}')" class="px-2 py-0.5 rounded text-[10px] font-bold ${t.vendorStatus === 'Lunas' ? 'bg-emerald-100 text-emerald-800' : 'bg-rose-100 text-rose-800'}">${t.vendorStatus}</button>
-          </td>
-        </tr>
-      `).join('');
-      lucide.createIcons();
-    }
-
-    async function toggleVendorStatus(id, current) {
-      const t = appData.transactions.find(x => x.id === id);
-      if (!t) return;
-      const next = current === 'Lunas' ? 'Belum Lunas' : 'Lunas';
-      try {
-        await rpc('update_transaction', { p_token: currentSession.token, p_id: id, p_customer_name: t.customer, p_total: t.totalNominal, p_total_hpp: t.totalHpp, p_vendor_status: next });
-      } catch (e) { return; }
-      await loadTransactions();
-      renderRekapTable();
-      renderDashboard();
-    }
-
     function renderOmzetPage() {
       let o = 0, h = 0;
       transactionsForMonth(selectedMonth).forEach(t => { o += t.totalNominal; h += t.totalHpp; });
@@ -893,7 +818,34 @@
       document.getElementById('omzet-percentage-badge').innerText = `Margin: ${o > 0 ? (((o - h) / o) * 100).toFixed(1) : 0}%`;
     }
 
-    // ===== STOK MASUK =====
+    // EDIT KATALOG & STOK
+    function openEditCatalogModal(id) {
+      const p = appData.catalog.find(x => x.id === id);
+      if (!p) return;
+      document.getElementById('edit-cat-id').value = p.id;
+      document.getElementById('edit-cat-name').value = p.name;
+      document.getElementById('edit-cat-price').value = p.price;
+      document.getElementById('edit-cat-hpp').value = p.hpp;
+      document.getElementById('edit-cat-stock').value = p.stock;
+      document.getElementById('modal-edit-catalog').classList.remove('hidden');
+    }
+    function closeEditCatalogModal() { document.getElementById('modal-edit-catalog').classList.add('hidden'); }
+    async function saveEditCatalog() {
+      const id = document.getElementById('edit-cat-id').value;
+      const name = document.getElementById('edit-cat-name').value.trim();
+      const price = parseInt(document.getElementById('edit-cat-price').value);
+      const hpp = parseInt(document.getElementById('edit-cat-hpp').value);
+      const stock = parseInt(document.getElementById('edit-cat-stock').value);
+      try {
+        await rpc('update_product', { p_token: currentSession.token, p_id: id, p_name: name, p_price: price, p_hpp: hpp, p_stock: stock });
+      } catch (e) { return; }
+      await loadCatalog();
+      closeEditCatalogModal();
+      renderDashboard();
+      renderPOS();
+    }
+
+    // STOK MASUK
     async function handleStockIn(e) {
       e.preventDefault();
       const variant = document.getElementById('stok-variant-select').value;
@@ -926,7 +878,149 @@
       lucide.createIcons();
     }
 
-    // ===== INISIALISASI HALAMAN =====
+    // MANAJEMEN PENGGUNA
+    function roleLabel(code) {
+      const r = rolesCache.find(x => x.code === code);
+      return r ? r.label : code;
+    }
+    function managerRoleCodes() {
+      return rolesCache.filter(r => r.can_manage_users).map(r => r.code);
+    }
+
+    async function renderUsersTable() {
+      usersCache = await rpc('list_users', { p_token: currentSession.token });
+      const rows = usersCache.map(u => {
+        const isSelf = currentSession.username === u.username;
+        const isManager = managerRoleCodes().includes(u.role_code);
+        return `
+        <tr class="hover:bg-stone-50">
+          <td class="p-3 font-mono font-bold text-stone-800">${u.username}${isSelf ? ' <span class="text-[9px] text-amber-600 font-bold">(Anda)</span>' : ''}</td>
+          <td class="p-3 font-bold text-stone-700">${u.full_name || '-'}</td>
+          <td class="p-3 text-center"><span class="px-2 py-0.5 rounded text-[10px] font-bold ${isManager ? 'bg-amber-100 text-amber-800' : 'bg-stone-100 text-stone-700'}">${roleLabel(u.role_code)}</span></td>
+          <td class="p-3 text-center">
+            <div class="flex items-center justify-center gap-1.5">
+              <button onclick="openEditUserModal('${u.username}')" class="p-1.5 bg-stone-100 hover:bg-stone-200 rounded-lg text-stone-700"><i data-lucide="edit" class="w-3.5 h-3.5"></i></button>
+              <button onclick="deleteUser('${u.username}')" class="p-1.5 bg-rose-50 hover:bg-rose-100 rounded-lg text-rose-600"><i data-lucide="trash-2" class="w-3.5 h-3.5"></i></button>
+            </div>
+          </td>
+        </tr>`;
+      }).join('');
+      document.getElementById('users-table-body').innerHTML = rows || `<tr><td colspan="4" class="p-6 text-center text-stone-400">Belum ada data pengguna.</td></tr>`;
+      lucide.createIcons();
+    }
+
+    function fillRoleSelect(selectedCode) {
+      const sel = document.getElementById('user-role');
+      sel.innerHTML = rolesCache.map(r => `<option value="${r.code}">${r.label}</option>`).join('');
+      sel.value = selectedCode || (rolesCache.find(r => !r.can_manage_users)?.code || rolesCache[0]?.code);
+    }
+
+    function showUserFormError(msg) {
+      const el = document.getElementById('user-form-error');
+      el.innerText = msg;
+      el.classList.remove('hidden');
+    }
+    function clearUserFormError() {
+      document.getElementById('user-form-error').classList.add('hidden');
+    }
+
+    function toggleUserPasswordVisibility() {
+      const input = document.getElementById('user-password');
+      const icon = document.getElementById('user-password-eye');
+      if (input.type === 'password') { input.type = 'text'; icon.setAttribute('data-lucide', 'eye-off'); }
+      else { input.type = 'password'; icon.setAttribute('data-lucide', 'eye'); }
+      lucide.createIcons();
+    }
+
+    function openAddUserModal() {
+      clearUserFormError();
+      document.getElementById('modal-user-title').innerText = 'Tambah Pengguna Baru';
+      document.getElementById('user-original-username').value = '';
+      document.getElementById('user-username').value = '';
+      document.getElementById('user-username').disabled = false;
+      document.getElementById('user-fullname').value = '';
+      document.getElementById('user-password').value = '';
+      document.getElementById('user-password').type = 'password';
+      document.getElementById('user-password-eye').setAttribute('data-lucide', 'eye');
+      document.getElementById('user-password-hint').innerText = '';
+      fillRoleSelect(null);
+      document.getElementById('modal-user').classList.remove('hidden');
+      lucide.createIcons();
+    }
+
+    function openEditUserModal(username) {
+      const u = usersCache.find(x => x.username === username);
+      if (!u) return;
+      clearUserFormError();
+      document.getElementById('modal-user-title').innerText = 'Edit Data Pengguna';
+      document.getElementById('user-original-username').value = username;
+      document.getElementById('user-username').value = username;
+      document.getElementById('user-username').disabled = true;
+      document.getElementById('user-fullname').value = u.full_name || '';
+      document.getElementById('user-password').value = '';
+      document.getElementById('user-password').type = 'password';
+      document.getElementById('user-password-eye').setAttribute('data-lucide', 'eye');
+      document.getElementById('user-password-hint').innerText = '(kosongkan jika tidak diubah)';
+      fillRoleSelect(u.role_code);
+      document.getElementById('modal-user').classList.remove('hidden');
+      lucide.createIcons();
+    }
+
+    function closeUserModal() { document.getElementById('modal-user').classList.add('hidden'); }
+
+    async function saveUser() {
+      clearUserFormError();
+      const originalUsername = document.getElementById('user-original-username').value;
+      const isEdit = !!originalUsername;
+      const username = document.getElementById('user-username').value.trim().toLowerCase();
+      const name = document.getElementById('user-fullname').value.trim();
+      const password = document.getElementById('user-password').value;
+      const role = document.getElementById('user-role').value;
+
+      if (!username || !/^[a-z0-9._-]+$/.test(username)) {
+        return showUserFormError('Username wajib diisi (huruf, angka, ".", "_", "-" saja, tanpa spasi).');
+      }
+      if (!name) return showUserFormError('Nama lengkap wajib diisi.');
+      if (!isEdit && !password) return showUserFormError('Password wajib diisi untuk pengguna baru.');
+
+      if (isEdit && originalUsername === currentSession.username && !managerRoleCodes().includes(role)) {
+        const otherManagers = usersCache.filter(u => u.username !== originalUsername && managerRoleCodes().includes(u.role_code));
+        if (otherManagers.length === 0) {
+          return showUserFormError('Tidak dapat mengubah role akun sendiri karena ini satu-satunya Administrator.');
+        }
+      }
+
+      try {
+        if (isEdit) {
+          await rpc('update_user', { p_token: currentSession.token, p_username: originalUsername, p_full_name: name, p_role_code: role, p_new_password: password || null });
+          if (originalUsername === currentSession.username) {
+            currentSession.name = name; currentSession.role = role;
+            localStorage.setItem('akasora_session', JSON.stringify(currentSession));
+          }
+        } else {
+          await rpc('create_user', { p_token: currentSession.token, p_username: username, p_password: password, p_full_name: name, p_role_code: role });
+        }
+      } catch (e) { return; }
+
+      closeUserModal();
+      renderUsersTable();
+    }
+
+    async function deleteUser(username) {
+      if (username === currentSession.username) {
+        return alert('Anda tidak dapat menghapus akun yang sedang digunakan sendiri.');
+      }
+      const managers = usersCache.filter(u => managerRoleCodes().includes(u.role_code));
+      const target = usersCache.find(u => u.username === username);
+      if (target && managerRoleCodes().includes(target.role_code) && managers.length <= 1) {
+        return alert('Tidak dapat menghapus Administrator terakhir dalam sistem.');
+      }
+      if (confirm(`Hapus akun pengguna "${username}" secara permanen?`)) {
+        try { await rpc('delete_user', { p_token: currentSession.token, p_username: username }); } catch (e) { return; }
+        renderUsersTable();
+      }
+    }
+
     async function init() {
       const check = await sbClient.rpc('current_user_from_token', { p_token: currentSession.token });
       if (check.error || !check.data || check.data.length === 0) {
@@ -941,7 +1035,6 @@
     }
 
     init();
-
   </script>
 </body>
 </html>
