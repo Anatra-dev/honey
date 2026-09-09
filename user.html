@@ -311,6 +311,7 @@
         <div class="flex items-center gap-2 flex-wrap">
           <input type="month" id="rekap-user-month-picker" onchange="onRekapUserMonthChange(this.value)" class="bg-white border border-stone-200 rounded-xl px-3 py-2.5 text-xs font-bold text-stone-700">
           <input type="text" id="rekap-user-search" oninput="renderRekapUserTable()" placeholder="Cari transaksi..." class="bg-white px-3 py-2.5 rounded-xl text-xs border border-stone-200">
+          <button onclick="refreshRekapUser()" title="Tarik data terbaru" class="p-2.5 bg-white border border-stone-200 rounded-xl text-stone-500 hover:text-amber-600 hover:border-amber-300 transition"><i data-lucide="refresh-cw" class="w-4 h-4"></i></button>
         </div>
       </div>
       <div class="bg-white rounded-2xl sm:rounded-3xl border border-stone-200/80 shadow-sm overflow-hidden">
@@ -642,21 +643,36 @@
       XLSX.writeFile(wb, `Rekap-Akasora-${selectedMonth}.xlsx`);
     }
 
-    function navigateTab(t) {
+    async function navigateTab(t) {
       document.querySelectorAll('.view-panel').forEach(e => e.classList.add('hidden'));
       document.querySelectorAll('.d-nav').forEach(e => e.classList.remove('bg-amber-600', 'text-white'));
       const activeV = document.getElementById(`view-${t}`);
       const activeD = document.getElementById(`nav-d-${t}`);
       if (activeV) activeV.classList.remove('hidden');
       if (activeD) activeD.classList.add('bg-amber-600', 'text-white');
-      if (t === 'dashboard') renderDashboard();
+      // Setiap kali pindah ke tab Dashboard atau Rekap, tarik ulang data terbaru dari
+      // server (Supabase) agar perubahan yang dibuat Admin (edit harga/total transaksi,
+      // status vendor, dll) langsung terlihat di sini tanpa perlu reload halaman.
+      if (t === 'dashboard') {
+        await Promise.all([loadCatalog(), loadStockLogs(), loadTransactions()]);
+        renderDashboard();
+      }
       if (t === 'pos') renderPOS();
       if (t === 'rekap') {
         const p = document.getElementById('rekap-user-month-picker');
         if (p) p.value = rekapUserMonth;
+        await loadTransactions();
         renderRekapUserTable();
       }
       if (t === 'stok') renderStockHistory();
+      lucide.createIcons();
+    }
+
+    // Tombol refresh manual di halaman Rekap, untuk menarik data terbaru
+    // tanpa harus pindah tab bolak-balik.
+    async function refreshRekapUser() {
+      await loadTransactions();
+      renderRekapUserTable();
       lucide.createIcons();
     }
 
