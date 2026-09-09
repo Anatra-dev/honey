@@ -53,6 +53,27 @@
 
     .bg-white.rounded-2xl, .bg-white.rounded-3xl { transition: transform .2s ease, box-shadow .2s ease; }
     .bg-white.rounded-2xl:hover, .bg-white.rounded-3xl:hover { transform: translateY(-2px); box-shadow: 0 12px 28px -14px rgba(120,90,40,0.25); }
+
+    /* CSS KHUSUS PRINT / CETAK PDF (nota / mini invoice) */
+    @media print {
+      body * { visibility: hidden !important; }
+      .printable-doc.print-active, .printable-doc.print-active * { visibility: visible !important; }
+
+      .print-active {
+        position: absolute !important;
+        left: 0 !important;
+        top: 0 !important;
+        width: 100% !important;
+        margin: 0 !important;
+        padding: 24px !important;
+        background: white !important;
+        color: black !important;
+        display: block !important;
+      }
+    }
+
+    .invoice-dashed { border-top: 1.5px dashed #d6d3d1; }
+    #printable-invoice.print-active { max-width: 420px; margin: 0 auto !important; padding: 28px !important; }
   </style>
 </head>
 <body class="bg-stone-100 text-stone-800 antialiased h-[100dvh] flex flex-col md:flex-row overflow-hidden select-none">
@@ -230,6 +251,7 @@
         <div class="flex items-center gap-2">
           <input type="month" id="rekap-month-picker" onchange="onMonthChange(this.value)" class="bg-white border border-stone-200 rounded-xl px-3 py-2 text-xs font-bold text-stone-700">
           <input type="text" id="rekap-search" oninput="renderRekapTable()" placeholder="Cari transaksi..." class="bg-white px-3 py-2 rounded-xl text-xs border border-stone-200">
+          <button onclick="refreshRekapAdmin()" title="Tarik data terbaru" class="p-2 bg-white border border-stone-200 rounded-xl text-stone-500 hover:text-amber-600 hover:border-amber-300 transition"><i data-lucide="refresh-cw" class="w-4 h-4"></i></button>
           <button onclick="exportMonthlyExcel()" class="px-3 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold shadow-md flex items-center gap-1.5 shrink-0"><i data-lucide="file-down" class="w-4 h-4"></i><span class="hidden sm:inline">Export</span></button>
         </div>
       </div>
@@ -245,6 +267,7 @@
                 <th class="p-3.5 text-right">HPP</th>
                 <th class="p-3.5 text-right">Laba</th>
                 <th class="p-3.5 text-center">Status Vendor</th>
+                <th class="p-3.5 text-center">Nota</th>
                 <th class="p-3.5 text-center">Aksi Admin</th>
               </tr>
             </thead>
@@ -346,7 +369,7 @@
 
   <!-- MODAL EDIT TRANSAKSI (ADMIN) -->
   <div id="modal-edit-transaction" class="modal-panel fixed inset-0 z-50 bg-stone-900/60 backdrop-blur-sm flex items-center justify-center p-4 hidden">
-    <div class="bg-white w-full max-w-sm rounded-3xl p-5 shadow-2xl space-y-3 text-xs">
+    <div class="bg-white w-full max-w-md rounded-3xl p-5 shadow-2xl space-y-3 text-xs max-h-[90vh] overflow-y-auto">
       <h3 class="font-extrabold text-sm text-stone-800">Edit Data Transaksi</h3>
       <input type="hidden" id="edit-tx-id">
       <div>
@@ -357,14 +380,21 @@
         <label class="font-bold block mb-1">Nama Customer</label>
         <input type="text" id="edit-tx-customer" class="w-full border p-2 rounded-xl font-bold">
       </div>
+
+      <div>
+        <label class="font-bold block mb-1.5">Item Pesanan <span class="font-normal text-stone-400">(ubah qty / harga satuan di sini — total akan otomatis menyesuaikan, dan nota di halaman Kasir akan ikut berubah)</span></label>
+        <div id="edit-tx-items" class="space-y-2"></div>
+      </div>
+
       <div class="grid grid-cols-2 gap-2">
         <div>
-          <label class="font-bold block mb-1">Total Omzet (Rp)</label>
-          <input type="number" id="edit-tx-total" class="w-full border p-2 rounded-xl font-bold">
+          <label class="font-bold block mb-1">Total Omzet (Rp) <span class="font-normal text-stone-400">otomatis</span></label>
+          <input type="hidden" id="edit-tx-total-raw">
+          <input type="text" id="edit-tx-total-display" disabled class="w-full bg-stone-100 border p-2 rounded-xl font-bold text-stone-600">
         </div>
         <div>
           <label class="font-bold block mb-1">Total HPP (Rp)</label>
-          <input type="number" id="edit-tx-hpp" class="w-full border p-2 rounded-xl font-bold">
+          <input type="number" id="edit-tx-hpp" oninput="editTxHppTouched = true" class="w-full border p-2 rounded-xl font-bold">
         </div>
       </div>
       <div>
@@ -379,6 +409,99 @@
         <button onclick="saveEditTransaction()" class="flex-1 py-2.5 bg-amber-600 text-white rounded-xl font-bold">Simpan Perubahan</button>
       </div>
     </div>
+  </div>
+
+  <!-- MODAL LIHAT NOTA / MINI INVOICE (ADMIN) -->
+  <div id="modal-invoice" class="modal-panel fixed inset-0 z-50 bg-stone-900/60 backdrop-blur-sm flex items-center justify-center p-4 hidden">
+    <div class="bg-white w-full max-w-sm rounded-3xl shadow-2xl overflow-hidden">
+      <div class="bg-stone-900 px-6 pt-6 pb-5 text-center relative">
+        <button onclick="closeInvoiceModal()" class="absolute right-4 top-4 text-stone-400 hover:text-white"><i data-lucide="x" class="w-4 h-4"></i></button>
+        <div class="w-10 h-10 rounded-2xl bg-amber-500 text-stone-950 flex items-center justify-center font-black mx-auto mb-2">
+          <i data-lucide="droplet" class="w-5 h-5 fill-current"></i>
+        </div>
+        <h3 class="font-display text-white font-semibold text-base">Akasora POS</h3>
+        <p class="text-[10px] text-amber-400 font-semibold uppercase tracking-wider">Nota Transaksi</p>
+      </div>
+
+      <div class="px-6 py-5 space-y-4 text-xs">
+        <div class="flex justify-between items-center">
+          <div>
+            <p class="text-[9px] uppercase tracking-wider text-stone-400 font-bold">No. Nota</p>
+            <p id="inv-code" class="font-mono font-black text-stone-800 text-sm">-</p>
+          </div>
+          <div class="text-right">
+            <p class="text-[9px] uppercase tracking-wider text-stone-400 font-bold">Tanggal</p>
+            <p id="inv-date" class="font-bold text-stone-700">-</p>
+          </div>
+        </div>
+
+        <div class="invoice-dashed pt-3">
+          <p class="text-[9px] uppercase tracking-wider text-stone-400 font-bold">Customer</p>
+          <p id="inv-customer" class="font-bold text-stone-800 text-sm">-</p>
+        </div>
+
+        <div class="invoice-dashed pt-3">
+          <p class="text-[9px] uppercase tracking-wider text-stone-400 font-bold mb-2">Item Pesanan</p>
+          <div id="inv-items" class="space-y-1.5"></div>
+        </div>
+
+        <div class="invoice-dashed pt-3 flex justify-between items-center">
+          <span class="font-bold text-stone-600 text-xs">Total Harga</span>
+          <span id="inv-total" class="font-black text-amber-700 text-lg">Rp 0</span>
+        </div>
+
+        <div class="flex justify-center">
+          <span id="inv-status" class="px-3 py-1 rounded-full text-[10px] font-bold">-</span>
+        </div>
+      </div>
+
+      <div class="px-6 pb-6 pt-1 flex gap-2">
+        <button onclick="closeInvoiceModal()" class="flex-1 py-2.5 border rounded-xl font-bold text-xs">Tutup</button>
+        <button onclick="printInvoicePDF()" class="flex-1 py-2.5 bg-stone-900 hover:bg-stone-800 text-white rounded-xl font-bold text-xs flex items-center justify-center gap-1.5">
+          <i data-lucide="printer" class="w-3.5 h-3.5 text-amber-400"></i>
+          <span>Cetak PDF</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- LEMBAR DOKUMEN CETAK PDF MINI INVOICE (tersembunyi, hanya tampil saat print) -->
+  <div id="printable-invoice" class="printable-doc hidden text-stone-900 p-6 font-sans">
+    <div class="text-center border-b-2 border-stone-900 pb-3 mb-4">
+      <h1 class="text-lg font-black tracking-tight">AKASORA — Rumah Madu Rokan</h1>
+      <p class="text-[10px] text-stone-600">Nota Transaksi Penjualan</p>
+    </div>
+    <div class="flex justify-between text-xs mb-3">
+      <div>
+        <p class="text-stone-500 text-[9px] uppercase font-bold">No. Nota</p>
+        <p id="pdf-inv-code" class="font-mono font-black">-</p>
+      </div>
+      <div class="text-right">
+        <p class="text-stone-500 text-[9px] uppercase font-bold">Tanggal</p>
+        <p id="pdf-inv-date" class="font-bold">-</p>
+      </div>
+    </div>
+    <div class="text-xs mb-3 border-t border-b border-dashed border-stone-400 py-2">
+      <p class="text-stone-500 text-[9px] uppercase font-bold">Customer</p>
+      <p id="pdf-inv-customer" class="font-bold">-</p>
+    </div>
+    <table class="w-full text-left text-xs mb-3">
+      <thead class="border-b border-stone-400">
+        <tr>
+          <th class="py-1.5">Item</th>
+          <th class="py-1.5 text-center">Qty</th>
+          <th class="py-1.5 text-right">Harga</th>
+          <th class="py-1.5 text-right">Subtotal</th>
+        </tr>
+      </thead>
+      <tbody id="pdf-inv-items" class="divide-y divide-stone-200"></tbody>
+    </table>
+    <div class="flex justify-between items-center border-t-2 border-stone-900 pt-2 text-sm">
+      <span class="font-bold">Total Harga</span>
+      <span id="pdf-inv-total" class="font-black">Rp 0</span>
+    </div>
+    <p id="pdf-inv-status" class="text-center text-[10px] font-bold mt-3">-</p>
+    <p class="text-center text-[9px] text-stone-500 mt-6">Terima kasih telah berbelanja di Akasora — Rumah Madu Rokan</p>
   </div>
 
   <!-- MODAL EDIT HARGA KERANJANG -->
@@ -479,6 +602,9 @@
     let usersCache = [];
     let cart = [];
     let activeEditCartId = null;
+    let editTxItems = [];
+    let editTxHppTouched = false;
+    let activeInvoiceId = null;
     let selectedMonth = new Date().toISOString().slice(0, 7);
     const formatRp = (n) => "Rp " + Number(n || 0).toLocaleString("id-ID");
     const formatTgl = (iso) => new Date(iso).toLocaleString('id-ID', { dateStyle: 'short', timeStyle: 'short' });
@@ -554,19 +680,37 @@
       XLSX.writeFile(wb, `Rekap-Akasora-${selectedMonth}.xlsx`);
     }
 
-    function navigateTab(t) {
+    async function navigateTab(t) {
       document.querySelectorAll('.view-panel').forEach(e => e.classList.add('hidden'));
       document.querySelectorAll('.d-nav').forEach(e => e.classList.remove('bg-amber-600', 'text-white'));
       const activeV = document.getElementById(`view-${t}`);
       const activeD = document.getElementById(`nav-d-${t}`);
       if (activeV) activeV.classList.remove('hidden');
       if (activeD) activeD.classList.add('bg-amber-600', 'text-white');
-      if (t === 'dashboard') renderDashboard();
+      // Tarik ulang data terbaru dari server setiap pindah tab, supaya perubahan
+      // (dari Admin sendiri atau dari Kasir di user.html) selalu tersinkron.
+      if (t === 'dashboard') {
+        await Promise.all([loadCatalog(), loadStockLogs(), loadTransactions()]);
+        renderDashboard();
+      }
       if (t === 'pos') renderPOS();
-      if (t === 'rekap') renderRekapTable();
-      if (t === 'omzet') renderOmzetPage();
+      if (t === 'rekap') {
+        await loadTransactions();
+        renderRekapTable();
+      }
+      if (t === 'omzet') {
+        await loadTransactions();
+        renderOmzetPage();
+      }
       if (t === 'stok') renderStockHistory();
       if (t === 'users') renderUsersTable();
+      lucide.createIcons();
+    }
+
+    // Tombol refresh manual di halaman Rekap.
+    async function refreshRekapAdmin() {
+      await loadTransactions();
+      renderRekapTable();
       lucide.createIcons();
     }
 
@@ -623,6 +767,11 @@
             <button onclick="toggleVendorStatus(${t.id}, '${t.vendorStatus}')" class="px-2 py-0.5 rounded text-[10px] font-bold ${t.vendorStatus === 'Lunas' ? 'bg-emerald-100 text-emerald-800' : 'bg-rose-100 text-rose-800'}">${t.vendorStatus}</button>
           </td>
           <td class="p-3 text-center">
+            <button onclick="openInvoiceModal(${t.id})" title="Lihat Nota" class="p-1.5 bg-amber-50 hover:bg-amber-100 rounded-lg text-amber-700 inline-flex items-center justify-center">
+              <i data-lucide="eye" class="w-3.5 h-3.5"></i>
+            </button>
+          </td>
+          <td class="p-3 text-center">
             <div class="flex items-center justify-center gap-1.5">
               <button onclick="openEditTransactionModal(${t.id})" class="p-1.5 bg-stone-100 hover:bg-stone-200 rounded-lg text-stone-700" title="Edit Transaksi"><i data-lucide="edit" class="w-3.5 h-3.5"></i></button>
               <button onclick="handleDeleteTransaction(${t.id}, '${t.code}')" class="p-1.5 bg-rose-50 hover:bg-rose-100 rounded-lg text-rose-600" title="Hapus Transaksi"><i data-lucide="trash-2" class="w-3.5 h-3.5"></i></button>
@@ -639,10 +788,59 @@
       document.getElementById('edit-tx-id').value = t.id;
       document.getElementById('edit-tx-invoice').value = t.code;
       document.getElementById('edit-tx-customer').value = t.customer;
-      document.getElementById('edit-tx-total').value = t.totalNominal;
-      document.getElementById('edit-tx-hpp').value = t.totalHpp;
       document.getElementById('edit-tx-vendor').value = t.vendorStatus;
+      editTxHppTouched = false;
+      document.getElementById('edit-tx-hpp').value = t.totalHpp;
+      // Salin item transaksi ke state sementara agar qty/harga bisa diubah per baris
+      editTxItems = t.items.map(i => ({
+        product_id: i.product_id, name: i.name, weightG: i.weightG,
+        qty: i.qty, price: Number(i.price), hpp: Number(i.hpp) || 0
+      }));
+      renderEditTxItems();
       document.getElementById('modal-edit-transaction').classList.remove('hidden');
+      lucide.createIcons();
+    }
+
+    function renderEditTxItems() {
+      const box = document.getElementById('edit-tx-items');
+      box.innerHTML = editTxItems.map((i, idx) => `
+        <div class="p-2.5 rounded-xl bg-stone-50 border space-y-1.5">
+          <p class="font-bold text-stone-800">${i.name} <span class="text-stone-400 font-normal">${i.weightG ? i.weightG + 'g' : ''}</span></p>
+          <div class="flex items-end gap-2">
+            <div class="flex-1">
+              <label class="text-[9px] text-stone-400 font-bold uppercase block mb-0.5">Qty</label>
+              <input type="number" min="1" value="${i.qty}" onchange="updateEditTxItem(${idx}, 'qty', this.value)" class="w-full border p-1.5 rounded-lg font-bold text-xs">
+            </div>
+            <div class="flex-1">
+              <label class="text-[9px] text-stone-400 font-bold uppercase block mb-0.5">Harga Satuan</label>
+              <input type="number" min="0" step="1" value="${i.price}" onchange="updateEditTxItem(${idx}, 'price', this.value)" class="w-full border p-1.5 rounded-lg font-bold text-xs">
+            </div>
+            <div class="text-right w-24 shrink-0">
+              <label class="text-[9px] text-stone-400 font-bold uppercase block mb-0.5">Subtotal</label>
+              <p class="font-black">${formatRp(i.qty * i.price)}</p>
+            </div>
+          </div>
+        </div>
+      `).join('');
+      recalcEditTxTotals();
+    }
+
+    function updateEditTxItem(idx, field, val) {
+      const n = parseInt(val);
+      if (isNaN(n) || n < 0 || (field === 'qty' && n < 1)) { renderEditTxItems(); return; }
+      editTxItems[idx][field] = n;
+      renderEditTxItems();
+    }
+
+    function recalcEditTxTotals() {
+      const total = editTxItems.reduce((s, i) => s + (i.qty * i.price), 0);
+      document.getElementById('edit-tx-total-raw').value = total;
+      document.getElementById('edit-tx-total-display').value = formatRp(total);
+      // Sarankan HPP otomatis dari data HPP katalog saat ini, kecuali admin sudah mengubahnya manual
+      if (!editTxHppTouched) {
+        const suggestedHpp = editTxItems.reduce((s, i) => s + (i.qty * (i.hpp || 0)), 0);
+        document.getElementById('edit-tx-hpp').value = suggestedHpp;
+      }
     }
 
     function closeEditTransactionModal() {
@@ -652,15 +850,17 @@
     async function saveEditTransaction() {
       const id = parseInt(document.getElementById('edit-tx-id').value);
       const cust = document.getElementById('edit-tx-customer').value.trim();
-      const tot = parseInt(document.getElementById('edit-tx-total').value);
-      const hpp = parseInt(document.getElementById('edit-tx-hpp').value);
+      const tot = editTxItems.reduce((s, i) => s + (i.qty * i.price), 0);
+      const hpp = parseInt(document.getElementById('edit-tx-hpp').value) || 0;
       const ven = document.getElementById('edit-tx-vendor').value;
+      const items = editTxItems.map(i => ({ product_id: i.product_id, qty: i.qty, price: i.price }));
 
       try {
         await rpc('update_transaction', {
           p_token: currentSession.token,
           p_id: id,
           p_customer_name: cust,
+          p_items: items,
           p_total: tot,
           p_total_hpp: hpp,
           p_vendor_status: ven
@@ -689,12 +889,71 @@
       const t = appData.transactions.find(x => x.id === id);
       if (!t) return;
       const next = current === 'Lunas' ? 'Belum Lunas' : 'Lunas';
+      // Tidak mengirim p_items di sini (item tidak berubah) — cukup update status vendor,
+      // supaya stok tidak ikut dihitung ulang tanpa perlu.
       try {
         await rpc('update_transaction', { p_token: currentSession.token, p_id: id, p_customer_name: t.customer, p_total: t.totalNominal, p_total_hpp: t.totalHpp, p_vendor_status: next });
       } catch (e) { return; }
       await loadTransactions();
       renderRekapTable();
       renderDashboard();
+    }
+
+    // ===== MODAL & CETAK MINI INVOICE (NOTA) =====
+    function openInvoiceModal(id) {
+      const t = appData.transactions.find(x => x.id === id);
+      if (!t) return;
+      activeInvoiceId = id;
+
+      document.getElementById('inv-code').innerText = t.code;
+      document.getElementById('inv-date').innerText = t.date;
+      document.getElementById('inv-customer').innerText = t.customer;
+      document.getElementById('inv-items').innerHTML = t.items.map(i => `
+        <div class="flex justify-between items-center text-xs">
+          <span class="text-stone-700">${i.qty}x ${i.name}</span>
+          <span class="font-bold text-stone-800">${formatRp(i.price * i.qty)}</span>
+        </div>
+      `).join('');
+      document.getElementById('inv-total').innerText = formatRp(t.totalNominal);
+      const statusEl = document.getElementById('inv-status');
+      statusEl.innerText = t.vendorStatus;
+      statusEl.className = `px-3 py-1 rounded-full text-[10px] font-bold ${t.vendorStatus === 'Lunas' ? 'bg-emerald-100 text-emerald-800' : 'bg-rose-100 text-rose-800'}`;
+
+      document.getElementById('modal-invoice').classList.remove('hidden');
+      lucide.createIcons();
+    }
+
+    function closeInvoiceModal() {
+      document.getElementById('modal-invoice').classList.add('hidden');
+      activeInvoiceId = null;
+    }
+
+    function printInvoicePDF() {
+      const t = appData.transactions.find(x => x.id === activeInvoiceId);
+      if (!t) return;
+
+      document.getElementById('pdf-inv-code').innerText = t.code;
+      document.getElementById('pdf-inv-date').innerText = t.date;
+      document.getElementById('pdf-inv-customer').innerText = t.customer;
+      document.getElementById('pdf-inv-items').innerHTML = t.items.map(i => `
+        <tr>
+          <td class="py-1.5">${i.name}</td>
+          <td class="py-1.5 text-center">${i.qty}</td>
+          <td class="py-1.5 text-right">${formatRp(i.price)}</td>
+          <td class="py-1.5 text-right font-bold">${formatRp(i.price * i.qty)}</td>
+        </tr>
+      `).join('');
+      document.getElementById('pdf-inv-total').innerText = formatRp(t.totalNominal);
+      const pdfStatus = document.getElementById('pdf-inv-status');
+      pdfStatus.innerText = `Status Vendor: ${t.vendorStatus}`;
+      pdfStatus.className = `text-center text-[10px] font-bold mt-3 ${t.vendorStatus === 'Lunas' ? 'text-emerald-700' : 'text-rose-700'}`;
+
+      const reportEl = document.getElementById('printable-invoice');
+      reportEl.classList.remove('hidden');
+      reportEl.classList.add('print-active');
+      window.print();
+      reportEl.classList.remove('print-active');
+      reportEl.classList.add('hidden');
     }
 
     // POS KASIR
